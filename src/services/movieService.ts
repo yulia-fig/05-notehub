@@ -20,17 +20,14 @@ export const movieService = async (
   isSearch: string,
   isPage: number
 ): Promise<MovieServiceProps> => {
-  console.log(isSearch);
-  console.log(isPage);
-  axios.get(`https://notehub-public.goit.study/api`);
   const { data } = await api.get<MovieServiceProps>("/search/movie", {
     params: {
-      isSearch,
-      isPage,
+      query: isSearch,
+      page: isPage,
       include_adult: false,
       language: "en-US",
     },
   });
-  console.log(data);
+
   return data;
 };
