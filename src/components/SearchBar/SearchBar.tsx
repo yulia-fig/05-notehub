@@ -1,4 +1,5 @@
 import css from "./SearchBar.module.css";
+import { notifyError } from "../../services/toast";
 interface SearchBarProps {
     onSubmit: (value: string) => void;
 }
@@ -6,7 +7,7 @@ export default function SearchBar({onSubmit}: SearchBarProps) {
   const handleClick = (formData: FormData) => {
     const search = formData.get("query") as string;
     if (search.length === 0) {
-      //notifyError();
+      notifyError();
       return;
     }
     onSubmit(search);

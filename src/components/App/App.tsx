@@ -9,7 +9,8 @@ import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import MovieModal from "../MovieModal/MovieModal";
 import type { Movie } from "../../types/movie";
 import {movieService} from '../../services/movieService'
-
+import { Toaster } from "react-hot-toast";
+import { notifyNoMovies } from "../../services/toast";
 export default function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [isModal, setIsModal] = useState<Movie | null>(null);
@@ -24,15 +25,24 @@ export default function App() {
         setIsLoading(true);
         setIsError(false);
         const data = await movieService(isSearch, isPage);
+        if (data.results.length === 0) {
+          if (isPage === 1) notifyNoMovies();
+          setIsVideos([]);
+          return;
+        }
         setIsVideos(data.results)
       } catch (e) {
         console.error(e);
         setIsError(true);
+        setIsVideos([])
       }
       finally {setIsLoading(false)}
     };
     api();
   }, [isSearch, isPage]);
+  const closeModal = () => {
+    setIsModal(null);
+  };
   return (
     <div className={css.app}>
       <SearchBar
@@ -52,7 +62,9 @@ export default function App() {
       )}
       {isLoading && <Loader />}
       {isError && <ErrorMessage />}
-      {isModal && <MovieModal />}
+      {isModal && <MovieModal movie={isModal}
+          onClose={closeModal} />}
+          <Toaster position="top-center" reverseOrder={false} />
     </div>
   );
 }
