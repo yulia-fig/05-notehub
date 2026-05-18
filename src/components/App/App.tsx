@@ -15,11 +15,10 @@ import Paginate from "../ReactPaginate/ReactPaginate";
 export default function App() {
   const [isModal, setIsModal] = useState<Movie | null>(null);
 
-  const [isVideos, setIsVideos] = useState<Movie[]>([]);
   const [isSearch, setIsSearch] = useState("");
   const [isPage, setIsPage] = useState(1);
 
-  const { data, error, isLoading, isError, isSuccess } = useQuery({
+  const { data, isLoading, isError, isSuccess } = useQuery({
     queryKey: ["myVideoKey", isSearch, isPage],
     queryFn: () => movieService(isSearch, isPage),
     enabled: isSearch !== "", // якщо пошукове поле для вводу пусте, запит не робиться
@@ -43,7 +42,6 @@ export default function App() {
         onSubmit={(q) => {
           setIsSearch(q);
           setIsPage(1);
-          setIsVideos([]);
         }}
       />
       {isSuccess && totalPages > 1 && (
