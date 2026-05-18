@@ -28,6 +28,5 @@ export const movieService = async (
       language: "en-US",
     },
   });
-
   return data;
 };

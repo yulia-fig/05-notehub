@@ -5,6 +5,7 @@ interface MovieGridProps {
     onSelect: (movie: Movie) => void;
 }
 export default function MovieGrid({movies, onSelect}:MovieGridProps) {
+  console.log(movies)
   return (
     <ul className={css.grid}>
       {movies.map((movie)=>(<li key={movie.id} onClick={()=>onSelect(movie)}>
