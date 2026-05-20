@@ -9,48 +9,48 @@ import Modal from "../Modal/Modal";
 
 import { fetchNotes } from "../../services/noteService";
 import { Toaster } from "react-hot-toast";
-import { notifyNoMovies } from "../../services/toast";
-import Paginate from "../Pagination/Pagination";
+import { notifyNoNotes } from "../../services/toast";
+import Pagination from "../Pagination/Pagination";
 import { useDebouncedCallback } from 'use-debounce';
 import NoteList from "../NoteList/NoteList";
 import NoteForm from "../NoteForm/NoteForm"
 export default function App() {
-  const [createNoteThis, setCreateNoteThis] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [input, setInput] = useState("");
+const [searchQuery, setSearchQuery] = useState("");
 
-  const [isSearch, setIsSearch] = useState("");
   const [page, setPage] = useState(1);
 
 const { data, isLoading, isError, isSuccess, isFetching } = useQuery({
-    queryKey: ["notes", page, isSearch],
+    queryKey: ["notes", page, searchQuery],
     queryFn: () =>
       fetchNotes({
         page,
-        search: isSearch || undefined,
+        search: searchQuery || undefined,
         perPage: 12,
       }),
     placeholderData: keepPreviousData,
   });
  const debouncedSetQuery = useDebouncedCallback((value: string) => {
-    setIsSearch(value);
+    setSearchQuery(value);
   }, 500);
   const closeModal = () => {
-    setCreateNoteThis(false);
+    setIsModalOpen(false);
   };
   const openModal = () => {
-    setCreateNoteThis(true);
+    setIsModalOpen(true);
   };
 
   const results = data?.notes ?? [];
   const totalPages = data?.totalPages ?? 0;
   useEffect(() => {
     if (data?.notes && data.notes.length === 0) {
-      notifyNoMovies();
+      notifyNoNotes();
     }
   }, [data]);
    useEffect(() => {
      setPage(1)
-  }, [isSearch]);
+  }, [searchQuery]);
   return (
     <div className={css.app}>
       
@@ -63,7 +63,7 @@ const { data, isLoading, isError, isSuccess, isFetching } = useQuery({
           }}
       />
       {isSuccess && totalPages > 1 && (
-        <Paginate
+        <Pagination
           totalPages={totalPages}
           currentPage={page}
           onPageChange={setPage}
@@ -79,12 +79,12 @@ const { data, isLoading, isError, isSuccess, isFetching } = useQuery({
       
       {!isLoading && !isError && results.length > 0 && (
         <NoteList
-          movies={data?.notes || []}
+          notes={data?.notes || []}
           
         />
       )}
       
-      {createNoteThis && (
+      {isModalOpen && (
         <Modal onClose={closeModal}>
           <NoteForm onClose={closeModal} />
         </Modal>

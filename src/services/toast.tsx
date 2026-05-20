@@ -1,6 +1,6 @@
 import toast from "react-hot-toast";
 
-export const notifyNoMovies = () => {
+export const notifyNoNotes = () => {
   toast.error("No movies found for your request.");
 };
 

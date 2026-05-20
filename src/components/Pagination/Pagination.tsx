@@ -25,7 +25,7 @@ interface PaginationProps {
   onPageChange: (nextPage: number) => void;
 }
 
-export default function Paginate({ totalPages, currentPage, onPageChange }: PaginationProps) {
+export default function Pagination({ totalPages, currentPage, onPageChange }: PaginationProps) {
   return (
     <ReactPaginate
       pageCount={totalPages}

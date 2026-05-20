@@ -33,10 +33,9 @@ onClick={backdropClose}
   role="dialog"
   aria-modal="true"
 >
-  <div className={css.modal}>
    <div className={css.modal}>{children}</div>
   </div>
-</div>
+
 , document.body
 )
 }
