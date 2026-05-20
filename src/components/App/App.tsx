@@ -2,66 +2,93 @@ import "modern-normalize";
 import css from "./App.module.css";
 import { useState, useEffect } from "react";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
-import SearchBar from "../SearchBar/SearchBar";
-import MovieGrid from "../MovieGrid/MovieGrid";
+import SearchBox from "../SearchBox/SearchBox";
 import Loader from "../Loader/Loader";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
-import MovieModal from "../MovieModal/MovieModal";
-import type { Movie } from "../../types/movie";
-import { movieService } from "../../services/movieService";
+import Modal from "../Modal/Modal";
+
+import { fetchNotes } from "../../services/noteService";
 import { Toaster } from "react-hot-toast";
 import { notifyNoMovies } from "../../services/toast";
-import Paginate from "../ReactPaginate/ReactPaginate";
+import Paginate from "../Pagination/Pagination";
+import { useDebouncedCallback } from 'use-debounce';
+import NoteList from "../NoteList/NoteList";
+import NoteForm from "../NoteForm/NoteForm"
 export default function App() {
-  const [isModal, setIsModal] = useState<Movie | null>(null);
+  const [createNoteThis, setCreateNoteThis] = useState(false);
+  const [input, setInput] = useState("");
 
   const [isSearch, setIsSearch] = useState("");
-  const [isPage, setIsPage] = useState(1);
+  const [page, setPage] = useState(1);
 
-  const { data, isLoading, isError, isSuccess } = useQuery({
-    queryKey: ["myVideoKey", isSearch, isPage],
-    queryFn: () => movieService(isSearch, isPage),
-    enabled: isSearch !== "", // якщо пошукове поле для вводу пусте, запит не робиться
+const { data, isLoading, isError, isSuccess, isFetching } = useQuery({
+    queryKey: ["notes", page, isSearch],
+    queryFn: () =>
+      fetchNotes({
+        page,
+        search: isSearch || undefined,
+        perPage: 12,
+      }),
     placeholderData: keepPreviousData,
   });
-
+ const debouncedSetQuery = useDebouncedCallback((value: string) => {
+    setIsSearch(value);
+  }, 500);
   const closeModal = () => {
-    setIsModal(null);
+    setCreateNoteThis(false);
+  };
+  const openModal = () => {
+    setCreateNoteThis(true);
   };
 
-  const results = data?.results ?? [];
-  const totalPages = data?.total_pages ?? 0;
+  const results = data?.notes ?? [];
+  const totalPages = data?.totalPages ?? 0;
   useEffect(() => {
-    if (data?.results && data.results.length === 0) {
+    if (data?.notes && data.notes.length === 0) {
       notifyNoMovies();
     }
   }, [data]);
+   useEffect(() => {
+     setPage(1)
+  }, [isSearch]);
   return (
     <div className={css.app}>
-      <SearchBar
-        onSubmit={(q) => {
-          setIsSearch(q);
-          setIsPage(1);
-        }}
+      
+	<header className={css.toolbar}>
+		<SearchBox
+        value={input}
+          onChange={(val) => {
+            setInput(val);
+            debouncedSetQuery(val);
+          }}
       />
       {isSuccess && totalPages > 1 && (
         <Paginate
           totalPages={totalPages}
-          currentPage={isPage}
-          onPageChange={setIsPage}
+          currentPage={page}
+          onPageChange={setPage}
         />
       )}
-      {!isLoading && !isError && results.length > 0 && (
-        <MovieGrid
-          movies={data?.results || []}
-          onSelect={(movie) => {
-            setIsModal(movie);
-          }}
-        />
-      )}
-      {isLoading && <Loader />}
+      <button onClick={openModal} className={css.button}>Create note +</button>
+
+  </header>
+{(isLoading || isFetching) && <Loader />}
       {isError && <ErrorMessage />}
-      {isModal && <MovieModal movie={isModal} onClose={closeModal} />}
+
+      
+      
+      {!isLoading && !isError && results.length > 0 && (
+        <NoteList
+          movies={data?.notes || []}
+          
+        />
+      )}
+      
+      {createNoteThis && (
+        <Modal onClose={closeModal}>
+          <NoteForm onClose={closeModal} />
+        </Modal>
+      )}
       <Toaster position="top-center" reverseOrder={false} />
     </div>
   );

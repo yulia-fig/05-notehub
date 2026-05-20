@@ -6,7 +6,7 @@
 import ReactPaginateModule from "react-paginate";
 import type { ReactPaginateProps } from "react-paginate";
 import type { ComponentType } from "react";
-import css from "../App/App.module.css";
+import css from "./Pagination.module.css";
 
 // Оголошуємо додатковий тип, який описує те, що ми імпортували.
 // Це об’єкт форми { default: компонент }.
